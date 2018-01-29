@@ -31,12 +31,18 @@ const paths = {
     get devJs() {
         return this.dev + 'js/';
     },
+    get devAssets() {
+        return this.dev + 'assets/';
+    },
     build: './build/',
     get buildCss() {
         return this.build + 'css/';
     },
     get buildJs() {
         return this.build + 'js/';
+    },
+    get buildAssets() {
+        return this.build + 'assets/';
     }
 };
 
@@ -178,7 +184,13 @@ const lintJs = () => {
         .pipe(eslint.format());
 };
 
+const copyAssets = () => {
+    return gulp.src(paths.devAssets + '**/*.*')
+        .pipe(gulp.dest(paths.buildAssets));
+};
+
 const build = gulp.series(cleanBuild, gulp.parallel(
+    copyAssets,
     copyPages,
     buildSass,
     buildJs,
@@ -192,6 +204,7 @@ const watch = gulp.series(build, () => {
     gulp.watch([paths.devJs + '**/*.js'], lintJs);
     gulp.watch([paths.devPages + '*.html'], gulp.series(copyPages, reload));
     gulp.watch([paths.devScss + '**/*.scss'], gulp.parallel(buildSass, lintSass));
+    gulp.watch([paths.devAssets + '**/*.*'], gulp.series(copyAssets, reload));
 });
 
 gulp.task('default', watch);
