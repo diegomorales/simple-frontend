@@ -10,6 +10,8 @@ let gulp = require('gulp'),
     cssnano = require('cssnano'),
     stylelint = require('gulp-stylelint'),
     sourcemaps = require('gulp-sourcemaps'),
+    modernizr = require('gulp-modernizr'),
+    uglify = require('gulp-uglify'),
     webpack = require('webpack'),
     UglifyjsPlugin = require('uglifyjs-webpack-plugin'),
     eslint = require('gulp-eslint'),
@@ -194,9 +196,26 @@ const copyAssets = () => {
         .pipe(gulp.dest(paths.buildAssets));
 };
 
+const buildModernizr = () => {
+    return gulp.src([paths.devJs + '**/*.js', paths.devScss + '**/*.scss'])
+        .pipe(modernizr('modernizr-custom.js', {
+            options: [
+                'setClasses',
+                'addTest',
+                'html5printshiv',
+                'testProp',
+                'fnBind'
+            ],
+            excludeTests: ['hidden']
+        }))
+        .pipe(uglify())
+        .pipe(gulp.dest(paths.buildJs));
+};
+
 const build = gulp.series(cleanBuild, gulp.parallel(
     copyAssets,
     copyPages,
+    buildModernizr,
     buildSass,
     buildJs,
     lintSass,
