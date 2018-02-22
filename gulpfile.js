@@ -8,7 +8,7 @@ let gulp = require('gulp'),
     autoprefixer = require('autoprefixer'),
     postcss = require('gulp-postcss'),
     cssnano = require('cssnano'),
-    sasslint = require('gulp-sass-lint'),
+    stylelint = require('gulp-stylelint'),
     sourcemaps = require('gulp-sourcemaps'),
     webpack = require('webpack'),
     UglifyjsPlugin = require('uglifyjs-webpack-plugin'),
@@ -98,10 +98,15 @@ const lintSass = () => {
     return gulp.src([
         paths.devScss + '**/*.scss'
     ])
-        .pipe(sasslint({
-            configFile: '.sass-lint.yml'
-        }))
-        .pipe(sasslint.format());
+        .pipe(stylelint({
+            failAfterError: false,
+            reporters: [
+                {
+                    formatter: 'string',
+                    console: true
+                }
+            ]
+        }));
 };
 
 const buildJs = (done) => {
