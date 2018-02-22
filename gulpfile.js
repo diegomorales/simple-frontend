@@ -2,8 +2,6 @@ let gulp = require('gulp'),
     path = require('path'),
     browser = require('browser-sync'),
     del = require('del'),
-    gulpif = require('gulp-if'),
-    rename = require('gulp-rename'),
     sass = require('gulp-sass'),
     autoprefixer = require('autoprefixer'),
     postcss = require('gulp-postcss'),
@@ -13,14 +11,13 @@ let gulp = require('gulp'),
     modernizr = require('gulp-modernizr'),
     uglify = require('gulp-uglify'),
     webpack = require('webpack'),
-    UglifyjsPlugin = require('uglifyjs-webpack-plugin'),
-    eslint = require('gulp-eslint'),
-    yargs = require('yargs');
+    UglifyJsPlugin = require('uglifyjs-webpack-plugin'),
+    eslint = require('gulp-eslint');
 
-// Set environment
-process.env.NODE_ENV = !!(yargs.argv.production) ? 'production' : 'development';
+// Set default environment
+process.env.NODE_ENV = 'development';
 
-const isProd = process.env.NODE_ENV === 'production';
+const isProd = () => process.env.NODE_ENV === 'production';
 
 const paths = {
     dev: './src/',
@@ -73,7 +70,7 @@ const buildSass = () => {
         autoprefixer({browsers: ['last 2 versions']})
     ];
 
-    if (isProd) {
+    if (isProd()) {
         postCssTasks.push(cssnano({
             discardComments: {
                 removeAll: true
@@ -86,9 +83,6 @@ const buildSass = () => {
         .pipe(sass()
             .on('error', sass.logError))
         .pipe(postcss(postCssTasks))
-        .pipe(gulpif(isProd, rename({
-            suffix: '.min'
-        })))
         .pipe(sourcemaps.write('.'))
         .pipe(gulp.dest(paths.buildCss))
 
@@ -112,32 +106,23 @@ const lintSass = () => {
 };
 
 const buildJs = (done) => {
-    let plugins = [],
-        jsLoaders = [
-            {
-                loader: 'babel-loader'
-            }
-        ];
+    let plugins = [];
 
-    // Additional plugins and loaders for production build.
-    if (isProd) {
-        plugins.push(new UglifyjsPlugin({
+    if (isProd()) {
+        plugins.push(new UglifyJsPlugin({
             sourceMap: true
         }));
-
-        jsLoaders.unshift({
-            loader: 'strip-debug-loader'
-        });
     }
 
     webpack({
-        watch: !isProd,
-        devtool: 'source-map',
+        watch: !isProd(),
+        devtool: isProd() ? 'source-map' : 'eval-source-map',
         entry: {
-            main: paths.devJs + 'main.js',
+            main: path.resolve(paths.devJs, 'main.js')
         },
         output: {
-            filename: `[name]${isProd ? '.min' : ''}.js`,
+            publicPath: '/',
+            filename: '[name].js',
             path: path.resolve(__dirname, paths.buildJs)
         },
         module: {
@@ -145,12 +130,18 @@ const buildJs = (done) => {
                 {
                     test: /\.js$/,
                     exclude: /(node_modules)/,
-                    use: jsLoaders
+                    use: [
+                        {
+                            loader: 'babel-loader',
+                            options: {
+                                presets: ['env']
+                            }
+                        }
+                    ]
                 }
             ]
         },
         plugins: plugins
-
     }, (err, stats) => {
         if (err) {
             console.error(err.stack || err);
@@ -167,7 +158,7 @@ const buildJs = (done) => {
         }
 
         if (stats.hasWarnings()) {
-            console.warn(info.warnings)
+            console.warn(info.warnings);
         }
 
         // Log result...
@@ -232,4 +223,11 @@ const watch = gulp.series(build, () => {
 });
 
 gulp.task('default', watch);
-gulp.task('build', build);
+
+gulp.task('build', gulp.series((done) => {
+
+    // Set environment
+    process.env.NODE_ENV = 'production';
+
+    done();
+}, build));
