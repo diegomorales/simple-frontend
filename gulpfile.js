@@ -81,7 +81,7 @@ const buildCss = () => {
     }));
   }
 
-  return gulp.src(paths.devCss + '**/*.css')
+  return gulp.src(paths.devCss + '*.css')
     .pipe(sourcemaps.init())
     .pipe(postcss(postCssTasks))
     .pipe(sourcemaps.write('.'))
