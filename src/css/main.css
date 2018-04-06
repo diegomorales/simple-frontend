@@ -1,1 +1,9 @@
-@import '../../node_modules/normalize.css/normalize';
+/* Lib */
+@import "lib/lib.pcss";
+
+/* Abstracts */
+@import "abstracts/mixins.pcss";
+@import "abstracts/placeholders.pcss";
+
+/* Base */
+@import "base/base.pcss";
