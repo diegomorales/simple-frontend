@@ -2,6 +2,7 @@ let gulp = require('gulp'),
   path = require('path'),
   browser = require('browser-sync'),
   del = require('del'),
+  rename = require('gulp-rename'),
   postcss = require('gulp-postcss'),
   cssnext = require('postcss-cssnext'),
   atImport = require('postcss-import'),
@@ -25,8 +26,8 @@ const paths = {
   get devPages() {
     return this.dev + 'pages/';
   },
-  get devCss() {
-    return this.dev + 'css/';
+  get devPcss() {
+    return this.dev + 'pcss/';
   },
   get devJs() {
     return this.dev + 'js/';
@@ -66,7 +67,7 @@ const copyPages = () => {
     .pipe(gulp.dest(paths.build));
 };
 
-const buildCss = () => {
+const buildPcss = () => {
   let postCssTasks = [
     atImport(),
     precss(),
@@ -81,9 +82,10 @@ const buildCss = () => {
     }));
   }
 
-  return gulp.src(paths.devCss + '*.css')
+  return gulp.src(paths.devPcss + '*.pcss')
     .pipe(sourcemaps.init())
     .pipe(postcss(postCssTasks))
+    .pipe(rename({extname: '.css'}))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.buildCss))
 
@@ -91,9 +93,9 @@ const buildCss = () => {
     .pipe(browser.stream({match: '**/*.css'}));
 };
 
-const lintCss = () => {
+const lintPcss = () => {
   return gulp.src([
-    paths.devCss + '**/*.css'
+    paths.devPcss + '**/*.pcss'
   ])
     .pipe(stylelint({
       failAfterError: false,
@@ -189,7 +191,7 @@ const copyAssets = () => {
 };
 
 const buildModernizr = () => {
-  return gulp.src([paths.devJs + '**/*.js', paths.devCss + '**/*.css'])
+  return gulp.src([paths.devJs + '**/*.js', paths.devPcss + '**/*.pcss'])
     .pipe(modernizr('modernizr-custom.js', {
       options: [
         'setClasses',
@@ -208,9 +210,9 @@ const build = gulp.series(cleanBuild, gulp.parallel(
   copyAssets,
   copyPages,
   buildModernizr,
-  buildCss,
+  buildPcss,
   buildJs,
-  lintCss,
+  lintPcss,
   lintJs
 ));
 
@@ -219,7 +221,7 @@ const watch = gulp.series(build, () => {
 
   gulp.watch([paths.devJs + '**/*.js'], lintJs);
   gulp.watch([paths.devPages + '*.html'], gulp.series(copyPages, reload));
-  gulp.watch([paths.devCss + '**/*.css'], gulp.parallel(buildCss, lintCss));
+  gulp.watch([paths.devPcss + '**/*.pcss'], gulp.parallel(buildPcss, lintPcss));
   gulp.watch([paths.devAssets + '**/*.*'], gulp.series(copyAssets, reload));
 });
 
