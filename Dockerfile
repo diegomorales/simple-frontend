@@ -1,6 +1,8 @@
-FROM node:8
+FROM node:10
 
 RUN mkdir -p /home/node/code
+
+RUN npm i -g npm
 
 USER node
 

@@ -9,6 +9,7 @@
   "author": "Diego Morales",
   "license": "ISC",
   "devDependencies": {
+    "autoprefixer": "^8.5.2",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
     "babel-preset-env": "^1.6.1",
@@ -24,20 +25,15 @@
     "gulp-eslint": "^4.0.0",
     "gulp-modernizr": "^2.0.0",
     "gulp-postcss": "^7.0.1",
-    "gulp-rename": "^1.2.2",
+    "gulp-sass": "^4.0.1",
     "gulp-sourcemaps": "^2.6.3",
     "gulp-stylelint": "^6.0.0",
     "gulp-uglify": "^3.0.0",
-    "postcss-cssnext": "^3.1.0",
-    "postcss-import": "^11.1.0",
-    "precss": "^3.1.2",
     "stylelint": "^9.1.1",
-    "stylelint-config-standard": "^18.2.0",
+    "stylelint-config-sass-guidelines": "^5.0.0",
+    "stylelint-scss": "^3.1.0",
     "uglifyjs-webpack-plugin": "^1.1.6",
     "webpack": "^3.10.0"
   },
-  "dependencies": {
-    "mdn-polyfills": "^5.5.0",
-    "normalize.css": "^8.0.0"
-  }
+  "dependencies": {}
 }

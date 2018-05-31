@@ -1,6 +1,9 @@
 {
-  "extends": "stylelint-config-standard",
+  "extends": "stylelint-config-sass-guidelines",
+  "plugins": [
+    "stylelint-scss"
+  ],
   "rules": {
-    "at-rule-no-unknown": null
+    "order/properties-alphabetical-order": null
   }
 }

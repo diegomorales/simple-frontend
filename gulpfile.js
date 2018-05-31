@@ -2,11 +2,9 @@ let gulp = require('gulp'),
   path = require('path'),
   browser = require('browser-sync'),
   del = require('del'),
-  rename = require('gulp-rename'),
+  sass = require('gulp-sass'),
   postcss = require('gulp-postcss'),
-  cssnext = require('postcss-cssnext'),
-  atImport = require('postcss-import'),
-  precss = require('precss'),
+  autoprefixer = require('autoprefixer'),
   cssnano = require('cssnano'),
   stylelint = require('gulp-stylelint'),
   sourcemaps = require('gulp-sourcemaps'),
@@ -26,8 +24,8 @@ const paths = {
   get devPages() {
     return this.dev + 'pages/';
   },
-  get devPcss() {
-    return this.dev + 'pcss/';
+  get devScss() {
+    return this.dev + 'scss/';
   },
   get devJs() {
     return this.dev + 'js/';
@@ -67,11 +65,9 @@ const copyPages = () => {
     .pipe(gulp.dest(paths.build));
 };
 
-const buildPcss = () => {
+const buildScss = () => {
   let postCssTasks = [
-    atImport(),
-    precss(),
-    cssnext({browsers: ['last 2 versions']})
+    autoprefixer({browsers: ['last 2 versions']})
   ];
 
   if (isProd()) {
@@ -82,10 +78,11 @@ const buildPcss = () => {
     }));
   }
 
-  return gulp.src(paths.devPcss + '*.pcss')
+  return gulp.src(paths.devScss + '*.scss')
     .pipe(sourcemaps.init())
+    .pipe(sass()
+      .on('error', sass.logError))
     .pipe(postcss(postCssTasks))
-    .pipe(rename({extname: '.css'}))
     .pipe(sourcemaps.write('.'))
     .pipe(gulp.dest(paths.buildCss))
 
@@ -93,9 +90,9 @@ const buildPcss = () => {
     .pipe(browser.stream({match: '**/*.css'}));
 };
 
-const lintPcss = () => {
+const lintScss = () => {
   return gulp.src([
-    paths.devPcss + '**/*.pcss'
+    paths.devScss + '**/*.scss'
   ])
     .pipe(stylelint({
       failAfterError: false,
@@ -191,7 +188,7 @@ const copyAssets = () => {
 };
 
 const buildModernizr = () => {
-  return gulp.src([paths.devJs + '**/*.js', paths.devPcss + '**/*.pcss'])
+  return gulp.src([paths.devJs + '**/*.js', paths.devScss + '**/*.scss'])
     .pipe(modernizr('modernizr-custom.js', {
       options: [
         'setClasses',
@@ -210,9 +207,9 @@ const build = gulp.series(cleanBuild, gulp.parallel(
   copyAssets,
   copyPages,
   buildModernizr,
-  buildPcss,
+  buildScss,
   buildJs,
-  lintPcss,
+  lintScss,
   lintJs
 ));
 
@@ -221,7 +218,7 @@ const watch = gulp.series(build, () => {
 
   gulp.watch([paths.devJs + '**/*.js'], lintJs);
   gulp.watch([paths.devPages + '*.html'], gulp.series(copyPages, reload));
-  gulp.watch([paths.devPcss + '**/*.pcss'], gulp.parallel(buildPcss, lintPcss));
+  gulp.watch([paths.devScss + '**/*.scss'], gulp.parallel(buildScss, lintScss));
   gulp.watch([paths.devAssets + '**/*.*'], gulp.series(copyAssets, reload));
 });
 
