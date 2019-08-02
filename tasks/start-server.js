@@ -5,7 +5,6 @@ module.exports = function startServer () {
     server: {
       baseDir: './build',
       port: 3000
-    },
-    open: false
+    }
   });
 };
